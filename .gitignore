@@ -29,3 +29,6 @@ mvnw*
 
 # Mac OS files
 **.DS_Store
+
+bin/
+tmp/
