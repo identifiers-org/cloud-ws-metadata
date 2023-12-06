@@ -1,14 +1,9 @@
 package org.identifiers.cloud.ws.metadata.models;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.identifiers.cloud.ws.metadata.TestRedisServer;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,16 +18,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Timestamp: 2018-02-12 13:28
  * ---
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class MetadataFetcherTest {
+@SpringBootTest(classes = {TestRedisServer.class})
+class MetadataFetcherTest {
 
     // TODO - Fix this unit test or kill it
     @Autowired
     MetadataFetcher metadataFetcher;
 
     @Test
-    public void testValidMetadata() {
+    void testValidMetadata() {
         // NOTE - Possible future extension here to make it more exhaustive
         // This unit test is too dependant on that particular URL to be up, as soon as this is working, I may
         // choose to deactivate this test

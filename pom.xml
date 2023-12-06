@@ -15,8 +15,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.6.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.1.5</version>
 	</parent>
 
 	<licenses>
@@ -33,6 +32,18 @@
 	</organization>
 
 	<developers>
+		<developer>
+			<id>renatocjn</id>
+			<name>Renato Caminha Juacaba Neto</name>
+			<email>rjuacaba@ebi.ac.uk</email>
+			<organization>EMBL-European Bioinformatics Institute</organization>
+			<organizationUrl>https://ebi.ac.uk/</organizationUrl>
+			<timezone>Europe/London</timezone>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+		</developer>
 		<developer>
 			<id>mbernal</id>
 			<name>Manuel Bernal-Llinares</name>
@@ -61,21 +72,21 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>testcontainers</artifactId>
-			<version>1.17.6</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.identifiers.cloud</groupId>
 			<artifactId>libapi</artifactId>
-			<version>2.3.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		
 		<dependency>
@@ -86,12 +97,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.9.0</version>
 		</dependency>
 
 		<dependency>
@@ -108,19 +113,17 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.11.2</version>
+			<version>1.17.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
-			<version>2.67.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-chrome-driver</artifactId>
-			<version>3.14.0</version>
 		</dependency>
 
 		<dependency>

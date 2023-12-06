@@ -2,7 +2,6 @@ package org.identifiers.cloud.ws.metadata.channels.metadataExtractionResult;
 
 import org.identifiers.cloud.ws.metadata.data.models.MetadataExtractionResult;
 import org.identifiers.cloud.ws.metadata.channels.Publisher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
@@ -17,10 +16,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MetadataExtractionResultPublisher extends Publisher<String, MetadataExtractionResult> {
-    @Autowired
-    private RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate;
-    @Autowired
-    private ChannelTopic channelTopicMetadataExtractionResult;
+    private final RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate;
+    private final ChannelTopic channelTopicMetadataExtractionResult;
+    public MetadataExtractionResultPublisher(
+            RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate,
+            ChannelTopic channelTopicMetadataExtractionResult) {
+        this.metadataExtractionResultRedisTemplate = metadataExtractionResultRedisTemplate;
+        this.channelTopicMetadataExtractionResult = channelTopicMetadataExtractionResult;
+    }
 
     @Override
     protected ChannelTopic getChannelTopic() {

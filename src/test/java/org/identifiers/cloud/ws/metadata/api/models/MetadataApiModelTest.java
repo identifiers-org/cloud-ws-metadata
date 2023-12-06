@@ -10,22 +10,19 @@ import org.identifiers.cloud.ws.metadata.api.requests.RequestFetchMetadataForUrl
 import org.identifiers.cloud.ws.metadata.api.requests.ServiceRequestFetchMetadataForUrl;
 import org.identifiers.cloud.ws.metadata.api.responses.ServiceResponseFetchMetadata;
 import org.identifiers.cloud.ws.metadata.api.responses.ServiceResponseFetchMetadataForUrl;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TestRedisServer.class })
-public class MetadataApiModelTest {
+class MetadataApiModelTest {
     public static final String PAGE_WITH_METADATA_URL = "http://localhost:8082/page_with_metadata.html";
     @Autowired
     MetadataApiModel model;
@@ -34,7 +31,7 @@ public class MetadataApiModelTest {
     ResolverService resolverService;
 
     @Test
-    public void testGetMetadataFor() {
+    void testGetMetadataFor() {
         ServiceResponseResolve response = getValidResolverResponse();
         Mockito.when(resolverService.requestCompactIdResolution(Mockito.anyString())).thenReturn(response);
 
@@ -43,7 +40,7 @@ public class MetadataApiModelTest {
     }
 
     @Test
-    public void testGetMetadataForRawRequest() {
+    void testGetMetadataForRawRequest() {
         ServiceResponseResolve response = getValidResolverResponse();
         Mockito.when(resolverService.requestResolutionRawRequest(Mockito.anyString())).thenReturn(response);
 
@@ -52,7 +49,7 @@ public class MetadataApiModelTest {
     }
 
     @Test
-    public void testGetMetadataForUrl() {
+    void testGetMetadataForUrl() {
         ServiceRequestFetchMetadataForUrl request = new ServiceRequestFetchMetadataForUrl();
         request.setApiVersion("1.0");
         RequestFetchMetadataForUrlPayload payload = new RequestFetchMetadataForUrlPayload();

@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 public class IdResolverThroughResolverWebService implements IdResolver {
-    private static Logger logger = LoggerFactory.getLogger(IdResolverThroughResolverWebService.class);
+    private static final Logger logger = LoggerFactory.getLogger(IdResolverThroughResolverWebService.class);
 
     final ResolverService resolverService;
 

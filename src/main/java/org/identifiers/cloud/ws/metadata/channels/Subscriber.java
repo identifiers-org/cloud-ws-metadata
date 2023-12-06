@@ -22,7 +22,7 @@ import java.util.Set;
 public abstract class Subscriber<K, V> implements MessageListener {
     private static final Logger logger = LoggerFactory.getLogger(Subscriber.class);
 
-    private Set<Listener<V>> listeners = new HashSet<>();
+    private final Set<Listener<V>> listeners = new HashSet<>();
 
     protected abstract RedisMessageListenerContainer getRedisContainer();
     protected abstract ChannelTopic getChannelTopic();
@@ -38,6 +38,7 @@ public abstract class Subscriber<K, V> implements MessageListener {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void onMessage(Message message, byte[] bytes) {
         V value = (V) getRedisTemplate().getValueSerializer().deserialize(message.getBody());
         listeners.parallelStream().forEach(listener -> listener.process(value));

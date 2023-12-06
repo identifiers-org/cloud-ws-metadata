@@ -2,16 +2,21 @@ package org.identifiers.cloud.ws.metadata.models;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +33,7 @@ import java.util.stream.Collectors;
 @Deprecated
 public class MetadataFetcherSimple implements MetadataFetcher {
     // TODO - Is it worth updating this one to use the new error codes in the exception?
-    private static Logger logger = LoggerFactory.getLogger(MetadataFetcherSimple.class);
+    private static final Logger logger = LoggerFactory.getLogger(MetadataFetcherSimple.class);
 
     @Override
     public String fetchMetadataFor(String url) throws MetadataFetcherException {
@@ -37,7 +42,7 @@ public class MetadataFetcherSimple implements MetadataFetcher {
         // TODO   - First problem - Many pages produce the metadata content via Javascript
         // (SOLVED) Second problem - When a URL is HTTPS, very often the certificate is considered not valid
         try {
-            document = Jsoup.connect(url).validateTLSCertificates(false).get();
+            document = SSLHelper.getConnection(url).get();
         } catch (IOException e) {
             throw new MetadataFetcherException(String.format("METADATA FETCH ERROR for URL '%s', there was a problem while fetching its content", url));
         }
@@ -46,7 +51,7 @@ public class MetadataFetcherSimple implements MetadataFetcher {
         String jsonldSelector = "script[type='application/ld+json']";
         Elements jsonldElements = document.head().select(jsonldSelector);
         if (jsonldElements.size() > 1) {
-            String errorMessage = String.format("MULTIPLE JSON-LD entries found in the header of URL '%s', entries: %s", url, jsonldElements.toString());
+            String errorMessage = String.format("MULTIPLE JSON-LD entries found in the header of URL '%s', entries: %s", url, jsonldElements);
             logger.error(errorMessage);
             throw new MetadataFetcherException(errorMessage);
         }
@@ -79,5 +84,31 @@ public class MetadataFetcherSimple implements MetadataFetcher {
         String contexts = String.join(",", contextParents.stream().map(jsonNode -> jsonNode.get("@context").asText()).collect(Collectors.toSet()));
         logger.info("SUCCESSFUL metadata extraction from URL '{}', METADATA '{}', found contexts '[{}]'", url, metadata, contexts);
         return metadata;
+    }
+
+    private static class SSLHelper { //https://stackoverflow.com/a/58325184
+        public static Connection getConnection(String url){
+            return Jsoup.connect(url).sslSocketFactory(SSLHelper.socketFactory());
+        }
+
+        private static SSLSocketFactory socketFactory() {
+            TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+            }};
+
+            try {
+                SSLContext sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+                return sslContext.getSocketFactory();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException("Failed to create a SSL socket factory", e);
+            }
+        }
     }
 }

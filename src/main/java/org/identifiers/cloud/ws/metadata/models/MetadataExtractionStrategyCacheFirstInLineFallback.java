@@ -9,7 +9,6 @@ import org.identifiers.cloud.ws.metadata.data.services.MetadataExtractionResultS
 import org.identifiers.cloud.ws.metadata.data.services.MetadataExtractionResultServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,7 @@ import java.util.concurrent.BlockingDeque;
  * This strategy will try to get metadata from the cache first, falling back to metadata inline extraction if there is
  * nothing on the cache for the given resolved resources.
  * <p>
- * Let's explain this with a little bit more details.
+ * Let's explain this with some more detail.
  * <p>
  * When a list of resolved resources is presented to this metadata extraction strategy, it will iterate through that
  * list from the most recommenden to the least recommended.
@@ -46,17 +45,21 @@ import java.util.concurrent.BlockingDeque;
  */
 @Component
 public class MetadataExtractionStrategyCacheFirstInLineFallback implements MetadataExtractionStrategy {
-    private static final Logger logger = LoggerFactory.getLogger(MetadataExtractionStrategyCacheFirstInLineFallback
-            .class);
+    private static final Logger logger = LoggerFactory.getLogger(MetadataExtractionStrategyCacheFirstInLineFallback.class);
 
-    @Autowired
-    private MetadataExtractionResultService metadataExtractionResultService;
-    @Autowired
-    private MetadataFetcher metadataFetcher;
-    @Autowired
-    private MetadataExtractionResultBuilder metadataExtractionResultBuilder;
-    @Autowired
-    private BlockingDeque<MetadataExtractionRequest> metadataExtractionRequestQueue;
+    private final MetadataExtractionResultService metadataExtractionResultService;
+    private final MetadataFetcher metadataFetcher;
+    private final MetadataExtractionResultBuilder metadataExtractionResultBuilder;
+    private final BlockingDeque<MetadataExtractionRequest> metadataExtractionRequestQueue;
+    public MetadataExtractionStrategyCacheFirstInLineFallback(MetadataExtractionResultService metadataExtractionResultService,
+                                                              MetadataExtractionResultBuilder metadataExtractionResultBuilder,
+                                                              BlockingDeque<MetadataExtractionRequest> metadataExtractionRequestQueue,
+                                                              MetadataFetcher metadataFetcher) {
+        this.metadataExtractionResultService = metadataExtractionResultService;
+        this.metadataExtractionResultBuilder = metadataExtractionResultBuilder;
+        this.metadataExtractionRequestQueue = metadataExtractionRequestQueue;
+        this.metadataFetcher = metadataFetcher;
+    }
 
     // Helpers
     private MetadataExtractionResult getCachedMetadataExtractionResult(ResolvedResource resolvedResource) {
@@ -70,22 +73,15 @@ public class MetadataExtractionStrategyCacheFirstInLineFallback implements Metad
     }
 
     @Override
-    public MetadataExtractionResult extractMetadata(List<ResolvedResource> resolvedResources) throws
-            MetadataExtractionStrategyException {
-        resolvedResources.sort((r1, r2) -> {
-            if (r1.getRecommendation().getRecommendationIndex() == r2.getRecommendation().getRecommendationIndex()) {
-                return 0;
-            }
-            if (r1.getRecommendation().getRecommendationIndex() > r2.getRecommendation().getRecommendationIndex()) {
-                return -1;
-            }
-            return 1;
-        });
+    public MetadataExtractionResult extractMetadata(List<ResolvedResource> resolvedResources)
+            throws MetadataExtractionStrategyException {
+        resolvedResources.sort((r1, r2) -> Integer.compare(r2.getRecommendation().getRecommendationIndex(),
+                                                           r1.getRecommendation().getRecommendationIndex()));
+
         // Prepare result
         MetadataExtractionResult metadataExtractionResult = null;
         List<String> reportMessages = new ArrayList<>();
-        for (ResolvedResource resolvedResource :
-                resolvedResources) {
+        for (ResolvedResource resolvedResource : resolvedResources) {
             logger.info("Processing access URL '{}' with score '{}'", resolvedResource.getCompactIdentifierResolvedUrl(),
                     resolvedResource.getRecommendation().getRecommendationIndex());
             // Get metadata from cache
@@ -111,7 +107,7 @@ public class MetadataExtractionStrategyCacheFirstInLineFallback implements Metad
                                     "with HTTP Status '%s'",
                             resolvedResource.getCompactIdentifierResolvedUrl(),
                             resolvedResource.getRecommendation().getRecommendationIndex(),
-                            HttpStatus.resolve(cachedMetadataExtractionResult.getHttpStatus()).toString());
+                            HttpStatus.resolve(cachedMetadataExtractionResult.getHttpStatus()));
                     logger.warn(message);
                     reportMessages.add(message);
                     metadataExtractionResult = cachedMetadataExtractionResult;
@@ -156,7 +152,7 @@ public class MetadataExtractionStrategyCacheFirstInLineFallback implements Metad
                             "access URL '%s', score '%s'",
                     resolvedResources.get(0).getCompactIdentifierResolvedUrl(),
                     resolvedResources.get(0).getRecommendation().getRecommendationIndex());
-            logger.warn(message);
+            logger.info(message);
             reportMessages.add(message);
             metadataExtractionResult =
                     metadataExtractionResultBuilder

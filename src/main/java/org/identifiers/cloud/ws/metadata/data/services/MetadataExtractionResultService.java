@@ -2,7 +2,6 @@ package org.identifiers.cloud.ws.metadata.data.services;
 
 import org.identifiers.cloud.ws.metadata.data.models.MetadataExtractionResult;
 import org.identifiers.cloud.ws.metadata.data.repositories.MetadataExtractionResultRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,8 +14,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MetadataExtractionResultService {
-    @Autowired
-    private MetadataExtractionResultRepository repository;
+    private final MetadataExtractionResultRepository repository;
+    public MetadataExtractionResultService(MetadataExtractionResultRepository repository) {
+        this.repository = repository;
+    }
 
     public MetadataExtractionResult findByAccessUrl(String accessUrl) throws MetadataExtractionResultServiceException {
         try {

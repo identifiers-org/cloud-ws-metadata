@@ -1,7 +1,7 @@
 package org.identifiers.cloud.ws.metadata.models;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -11,11 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +37,11 @@ public class MetadataFetcherChromeEngineBased implements MetadataFetcher {
 
     private ChromeDriverService chromeDriverService;
     private final ChromeOptions chromeOptions =
-            new ChromeOptions()
-                    .setHeadless(true)
-                    .addArguments("--disable-gpu",
-                            "--no-sandbox");
+            new ChromeOptions().addArguments(
+                    "--disable-gpu",
+                    "--no-sandbox",
+                    "--headless"
+                );
 
     @PostConstruct
     private void init() {
@@ -49,6 +49,7 @@ public class MetadataFetcherChromeEngineBased implements MetadataFetcher {
         chromeDriverService = new ChromeDriverService.Builder()
                 .usingDriverExecutable(new File(pathChromedriver))
                 .usingAnyFreePort()
+                .withSilent(true)
                 .build();
         try {
             chromeDriverService.start();
@@ -76,7 +77,7 @@ public class MetadataFetcherChromeEngineBased implements MetadataFetcher {
             driver.get(url); // FIXME: Not sure if this waits for all elements to load
 
             String jsonLdXpathQuery = "//script[@type='application/ld+json']";
-            List<WebElement> jsonLdWebElements = driver.findElementsByXPath(jsonLdXpathQuery);
+            List<WebElement> jsonLdWebElements = driver.findElements(By.xpath(jsonLdXpathQuery));
 
             ObjectMapper mapper = new ObjectMapper();
             metadataObjects = jsonLdWebElements.stream().map(webElement -> {

@@ -1,11 +1,8 @@
 package org.identifiers.cloud.ws.metadata.models;
 
 import org.identifiers.cloud.libapi.models.resolver.ResolvedResource;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Manuel Bernal Llinares <mbdebian@gmail.com>
@@ -22,8 +19,8 @@ public class IdResourceSelectorSimpleOfficial implements IdResourceSelector {
     public ResolvedResource selectResource(List<ResolvedResource> resources) throws IdResourceSelectorException {
         List<ResolvedResource> selected = resources
                 .parallelStream()
-                .filter(resolverApiResponseResource -> resolverApiResponseResource.isOfficial())
-                .collect(Collectors.toList());
+                .filter(ResolvedResource::isOfficial)
+                .toList();
         if (selected.isEmpty()) {
             throw new IdResourceSelectorException("NO ID RESOURCE could be selected for mining metadata from (select official resource selector)");
         }

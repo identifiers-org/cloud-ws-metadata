@@ -28,11 +28,11 @@ import java.util.List;
  */
 @Component
 public class MetadataApiModel {
-    private static Logger logger = LoggerFactory.getLogger(MetadataApiModel.class);
-    private IdResolver idResolver;
-    private MetadataFetcher metadataFetcher;
-    private IdResourceSelector idResourceSelector;
-    private MetadataExtractionStrategy metadataExtractionStrategy;
+    private static final Logger logger = LoggerFactory.getLogger(MetadataApiModel.class);
+    private final IdResolver idResolver;
+    private final MetadataFetcher metadataFetcher;
+    private final IdResourceSelector idResourceSelector;
+    private final MetadataExtractionStrategy metadataExtractionStrategy;
 
     public MetadataApiModel(IdResolver idResolver,
                             MetadataFetcher metadataFetcher,
@@ -129,7 +129,7 @@ public class MetadataApiModel {
     private ResolvedResource selectResource(String compactIdOrRequest,
                                             List<ResolvedResource> resources,
                                             ServiceResponseFetchMetadata response) {
-        ResolvedResource selectedResource = null;
+        ResolvedResource selectedResource;
         try {
             selectedResource = idResourceSelector.selectResource(resources);
         } catch (IdResourceSelectorException e) {
@@ -139,7 +139,7 @@ public class MetadataApiModel {
                     e.getMessage()));
             // TODO I need to refine the error reporting here to correctly flag errors as client or server side
             response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-            return selectedResource;
+            return null;
         }
         // Log selection
         ObjectMapper mapper = new ObjectMapper();
@@ -202,7 +202,7 @@ public class MetadataApiModel {
         if (response.getHttpStatus() == HttpStatus.OK) {
             // Select the provider
             ResolvedResource selectedResource = selectResource(compactId, resources, response);
-            if (response.getHttpStatus() == HttpStatus.OK) {
+            if (response.getHttpStatus() == HttpStatus.OK && selectedResource != null) {
                 extractMetadata(selectedResource, response, null, compactId);
             }
         }
@@ -224,7 +224,7 @@ public class MetadataApiModel {
             // because, even in the situation where, for some reason, we've got more than one provider when using a
             // provider code to resolve a Compact ID.
             ResolvedResource selectedResource = selectResource(compactId, resolvedResources, response);
-            if (response.getHttpStatus() == HttpStatus.OK) {
+            if (response.getHttpStatus() == HttpStatus.OK && selectedResource != null) {
                 extractMetadata(selectedResource, response, selector, compactId);
             }
         }
@@ -233,14 +233,9 @@ public class MetadataApiModel {
 
     public ServiceResponseFetchMetadata getMetadataForRawRequest(String rawRequest) {
         ServiceResponseFetchMetadata response = createDefaultResponseFetchMetadata(HttpStatus.OK, "");
-        logger.warn("Getting metadata for RAW Request '{}'", rawRequest);
+        logger.info("Getting metadata for RAW Request '{}'", rawRequest);
         List<ResolvedResource> resources = resolveRawRequest(rawRequest, response);
         if (response.getHttpStatus() == HttpStatus.OK) {
-            /*// Select the provider
-            ResolvedResource selectedResource = selectResource(rawRequest, resources, response);
-            if (response.getHttpStatus() == HttpStatus.OK) {
-                extractMetadata(selectedResource, response, null, rawRequest);
-            }*/
             extractMetadata(resources, response, rawRequest);
         }
         return response;

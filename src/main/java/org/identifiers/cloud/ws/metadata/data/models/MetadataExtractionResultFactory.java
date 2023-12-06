@@ -5,7 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
+import java.time.Duration;
 
 /**
  * Project: metadata
@@ -23,10 +24,10 @@ public class MetadataExtractionResultFactory {
     private static Long ttlResultWithoutMetadata = 10L;
 
     // Values from service configuration
-    @Value("${org.identifiers.cloud.ws.metadata.backend.data.metadataextractionresults.with.content.ttl.seconds}")
-    private Long configTtlResultWithMetadata;
-    @Value("${org.identifiers.cloud.ws.metadata.backend.data.metadataextractionresults.without.content.ttl.seconds}")
-    private Long configTtlResultWithoutMetadata;
+    @Value("${org.identifiers.cloud.ws.metadata.backend.data.metadataextractionresults.with.content.ttl}")
+    private Duration configTtlResultWithMetadata;
+    @Value("${org.identifiers.cloud.ws.metadata.backend.data.metadataextractionresults.without.content.ttl}")
+    private Duration configTtlResultWithoutMetadata;
 
     // Factory methods
     public static MetadataExtractionResult createResultWithMetadata() {
@@ -42,7 +43,7 @@ public class MetadataExtractionResultFactory {
     private void init() {
         logger.info("Setting metadata extraction results TTL to '{}s' and '{}s' for results with and without content",
                 configTtlResultWithMetadata, configTtlResultWithoutMetadata);
-        ttlResultWithMetadata = configTtlResultWithMetadata;
-        ttlResultWithoutMetadata = configTtlResultWithoutMetadata;
+        ttlResultWithMetadata = configTtlResultWithMetadata.getSeconds();
+        ttlResultWithoutMetadata = configTtlResultWithoutMetadata.getSeconds();
     }
 }

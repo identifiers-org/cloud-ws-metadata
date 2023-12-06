@@ -42,7 +42,7 @@ public class MetadataExtractionResult implements Serializable, Comparable<Metada
     private int httpStatus;
     // Extracted metadata from the access URL
     private String metadataContent;
-    // Optional explanation of a possible error that could have happen during the metadata extraction process
+    // Optional explanation of a possible error that could have happened during the metadata extraction process
     private String errorMessage;
 
     public String getResourceId() {

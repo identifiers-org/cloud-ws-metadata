@@ -10,9 +10,6 @@ import com.gargoylesoftware.htmlunit.html.DomNodeList;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.NodeList;
 
 import java.io.IOException;
@@ -32,17 +29,16 @@ import java.util.stream.IntStream;
 //@Profile("disabled")
 @Deprecated
 public class MetadataFetcherWithJavascript implements MetadataFetcher {
-    private Logger logger = LoggerFactory.getLogger(MetadataFetcherWithJavascript.class);
+    private final Logger logger = LoggerFactory.getLogger(MetadataFetcherWithJavascript.class);
 
     @Override
     public Object fetchMetadataFor(String url) throws MetadataFetcherException {
         // TODO - This is too slow, we need some kind of caching mechanism here
         // Fetch the URL content
-        WebClient webClient = new WebClient(BrowserVersion.CHROME);
-        webClient.getOptions().setThrowExceptionOnScriptError(false);
-        webClient.getOptions().setUseInsecureSSL(true);
         HtmlPage page = null;
-        try {
+        try (WebClient webClient = new WebClient(BrowserVersion.CHROME)) {
+            webClient.getOptions().setThrowExceptionOnScriptError(false);
+            webClient.getOptions().setUseInsecureSSL(true);
             page = webClient.getPage(url);
             // NOTE - Magic number here! OMG! Maybe change it in the future, if it makes sense
             webClient.waitForBackgroundJavaScript(10000);
@@ -60,21 +56,12 @@ public class MetadataFetcherWithJavascript implements MetadataFetcher {
         // Look for JSON-LD
         String jsonldSelector = "script[type='application/ld+json']";
         DomNodeList<DomNode> jsonldDomNodes = page.querySelectorAll(jsonldSelector);
-        /*if (jsonldDomNodes.size() > 1) {
-            String errorMessage = String.format("MULTIPLE JSON-LD entries found in the header of URL '%s', entries: %s", url, jsonldDomNodes.toString());
-            logger.error(errorMessage);
-            throw new MetadataFetcherException(errorMessage);
-        }*/
         if (jsonldDomNodes.isEmpty()) {
             String errorMessage = String.format("JSON-LD formatted METADATA NOT FOUND for URL '%s'", url);
             logger.error(errorMessage);
             throw new MetadataFetcherException(errorMessage, MetadataFetcherException.ErrorCode.METADATA_NOT_FOUND);
         }
         // Check on used contexts
-        //String metadata = jsonldDomNodes.get(0).getFirstChild().getTextContent();
-        /*String metadata = String.format("[%s]",
-                String.join(",", jsonldDomNodes.stream()
-                        .map(domNode -> domNode.getFirstChild().getTextContent()).collect(Collectors.toList())));*/
         ObjectMapper mapper = new ObjectMapper();
         List<Object> metadataObjects = jsonldDomNodes.stream().map(domNode -> {
             try {
@@ -85,12 +72,6 @@ public class MetadataFetcherWithJavascript implements MetadataFetcher {
             }
             return "ERROR IOException - Jackson JSON parser";
         }).collect(Collectors.toList());
-        /*String metadata = "ERROR - Jackson mapper";
-        try {
-            metadata = mapper.writeValueAsString(metadataObjects);
-        } catch (JsonProcessingException e) {
-            // TODO
-        }*/
         String metadata = "";
         try {
             metadata = mapper.writeValueAsString(metadataObjects);

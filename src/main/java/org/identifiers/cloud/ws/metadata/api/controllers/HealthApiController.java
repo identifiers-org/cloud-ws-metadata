@@ -20,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnProperty(value = "management.endpoint.health.enabled",
     matchIfMissing = true, havingValue = "false")
 public class HealthApiController {
-    @Autowired
-    private HealthApiModel model;
+    private final HealthApiModel model;
+    public HealthApiController(HealthApiModel model) {
+        this.model = model;
+    }
 
     // liveness probe
     @RequestMapping(value = "/liveness_check")

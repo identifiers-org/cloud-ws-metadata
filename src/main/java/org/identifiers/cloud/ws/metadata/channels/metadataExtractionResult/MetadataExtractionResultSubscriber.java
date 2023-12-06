@@ -2,13 +2,12 @@ package org.identifiers.cloud.ws.metadata.channels.metadataExtractionResult;
 
 import org.identifiers.cloud.ws.metadata.data.models.MetadataExtractionResult;
 import org.identifiers.cloud.ws.metadata.channels.Subscriber;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Project: metadata
@@ -20,14 +19,14 @@ import javax.annotation.PostConstruct;
  */
 @Component
 public class MetadataExtractionResultSubscriber extends Subscriber<String, MetadataExtractionResult> {
-    @Autowired
-    private RedisMessageListenerContainer redisContainer;
-
-    @Autowired
-    private ChannelTopic channelTopicMetadataExtractionResult;
-
-    @Autowired
-    private RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate;
+    private final RedisMessageListenerContainer redisContainer;
+    private final ChannelTopic channelTopicMetadataExtractionResult;
+    private final RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate;
+    public MetadataExtractionResultSubscriber(RedisMessageListenerContainer redisContainer, ChannelTopic channelTopicMetadataExtractionResult, RedisTemplate<String, MetadataExtractionResult> metadataExtractionResultRedisTemplate) {
+        this.redisContainer = redisContainer;
+        this.channelTopicMetadataExtractionResult = channelTopicMetadataExtractionResult;
+        this.metadataExtractionResultRedisTemplate = metadataExtractionResultRedisTemplate;
+    }
 
     @PostConstruct
     public void registerSubscriber() {
