@@ -1,0 +1,19 @@
+# This query requires a curie value as binding.
+#   Make sure you edit the query if you wish to run this directly.
+#   This is meant to be run from the identifiers.org sparql endpoint.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX tio: <http://togoid.dbcls.jp/ontology#>
+SELECT DISTINCT ?label ?related
+FROM <id:active>
+WHERE {
+  BIND (IRI(CONCAT("http://identifiers.org/", ?curie)) AS ?idorgUri) .
+  ?idorgUri owl:sameAs ?providerUrl .
+  SERVICE <http://ep.dbcls.jp/togoid-sparql> {
+    OPTIONAL {
+      ?providerUrl ?relation ?related .
+      ?relation tio:display_label ?label
+    }
+  }
+}
+LIMIT 10
