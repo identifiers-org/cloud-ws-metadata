@@ -32,3 +32,5 @@ mvnw*
 
 bin/
 tmp/
+
+pom.xml.versionsBackup
